@@ -1,3 +1,4 @@
+//Player Factory
 const Player = (name, token) => {
   const getName = () => name;
   const getToken = () => token;
@@ -5,6 +6,7 @@ const Player = (name, token) => {
   return {getName, getToken}
 };
 
+//game board module
 const gameBoard = (() => {
   let board = [[' ', ' ', ' '], 
                [' ', ' ', ' '],
@@ -14,15 +16,20 @@ const gameBoard = (() => {
   const placeToken = (row, col, token) => {
     board[row][col] = token;
   }
+  
+  // only give getBoard so that end user can't manually edit board and cheat
   return {getBoard, placeToken}
 })();
 
+//display controller module
 const displayController = (() => {
   const gameBoard = gameBoard();
   let currentPlayer = null;
   let nextPlayer = null;
   let winner = null;
   let gameOver = false;
+
+  const isGameOver = () => gameOver;
 
   const playerMove = (row, col) => {
     placeToken(row, col, currentPlayer.getToken());
@@ -57,9 +64,16 @@ const displayController = (() => {
       winner = currentPlayer;
       return
     }
-    
+
+    //swap the two players so that the next player's token is placed next turn
     let temp = currentPlayer;
     currentPlayer = nextPlayer;
     nextPlayer = temp;
   }
+
+  /* only make available what's really necessary: 
+      allowing the next player to make a move at a certain space and
+      letting the user know whether the game is over or not
+  */
+  return {playerMove, isGameOver}
 })();
