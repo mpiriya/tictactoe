@@ -5,28 +5,32 @@
 </head>
 
 <body>
-  <!--Display of both players and respective tokens, who's turn is it?, button to restart-->
-  <button id="restart">Restart</button>
-  <div class="container" id="p1" data-my-turn="true">
-    <div class="name" id="p1name">Player 1: X</div>
-    <button class="edit" id="p1nameEdit">Edit Name</button>
-    <form id="p1nameForm">
-      <input type="text" id="p1nameText">
-      <input type="button" id="p1nameSubmit" value="OK">
-    </form>
-  </div>
-  <div class="container" id="p2" data-my-turn="false">
-    <div class="name" id="p2name">Player 2: O</div>
-    <button class="edit" id="p2nameEdit">Edit Name</button>
-    <form id="p2nameForm">
-      <input type="text" id="p2nameText">
-      <input type="button" id="p2nameSubmit" value="OK">
-    </form>
-  </div>
-  <div class="container">
-    <table id="board"></table>
+  <div class="landing-page">
+    
   </div>
   
+  <div class="container">
+    <button id="restart">Restart</button>
+    <div class="game" id="p1" data-my-turn="true">
+      <div class="name" id="p1name">Player 1: X</div>
+      <button class="edit" id="p1nameEdit">Edit Name</button>
+      <form id="p1nameForm">
+        <input type="text" id="p1nameText">
+        <input type="button" id="p1nameSubmit" value="OK">
+      </form>
+    </div>
+    <div class="game" id="p2" data-my-turn="false">
+      <div class="name" id="p2name">Player 2: O</div>
+      <button class="edit" id="p2nameEdit">Edit Name</button>
+      <form id="p2nameForm">
+        <input type="text" id="p2nameText">
+        <input type="button" id="p2nameSubmit" value="OK">
+      </form>
+    </div>
+    <div class="game">
+      <table id="board"></table>
+    </div>
+  </div> 
   <script src="script.js"></script>
 </body>
 </html>

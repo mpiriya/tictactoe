@@ -49,20 +49,27 @@ const displayController = (() => {
   const getWinner = () => winner;
 
   const processTurn = (row, col) => {
-    if(!currentPlayer.isAI()) {
-      playerMove(row, col)
-    } else {
-      AIMove(currentPlayer, nextPlayer)
+    if(!gameOver) {
+      if(!currentPlayer.isAI()) {
+        playerMove(row, col)
+      } else {
+        AIMove(currentPlayer, nextPlayer)
+      }
     }
   }
 
   const playerMove = (row, col) => {
+    if(gameOver) {
+      return null
+    }
     if(!board.placeToken(row, col, currentPlayer.getToken())) {
       //do not switch player, and just do nothing
       return null
     }
 
+    //checks if the move was a winning move
     if(checkWin(currentPlayer)) {
+      //if so, set gameOver to true and 
       gameOver = true
       return winner
     }
@@ -185,14 +192,6 @@ const displayController = (() => {
       let maxScore = -1;
       for(let i = 0; i < 3; i++) {
         for(let j = 0; j < 3; j++) {
-          // if(boardCopy[i][j] == " ") {
-          //   boardCopy[i][j] = currentPlayer.getToken()
-          //   let score = minimax(boardCopy, nextPlayer)
-          //   boardCopy[i][j] = " " //return boardCopy[i][j] to preserve board state
-          //   if(score > maxScore) {
-          //     maxScore = score
-          //   }
-          // }
           if(board.placeToken(i, j, next.getToken())) {
             let score = minimax(human, ai, human)
             board.getBoard()[i][j] = " "
@@ -207,15 +206,6 @@ const displayController = (() => {
       let minScore = 1;
       for(let i = 0; i < 3; i++) {
         for(let j = 0; j < 3; j++) {
-          // if(boardCopy[i][j] == " ") {
-          //   boardCopy[i][j] = nextPlayer.getToken()
-          //   let score = minimax(boardCopy, currentPlayer)
-          //   boardCopy[i][j] = " " //return boardCopy[i][j] to preserve board state
-          //   if(score < minScore) {
-          //     minScore = score
-          //   }
-          // }
-
           if(board.placeToken(i, j, next.getToken())) {
             let score = minimax(human, ai, ai)
             board.getBoard()[i][j] = " "
@@ -247,49 +237,49 @@ const displayController = (() => {
 
 (function createHTMLBoard() {
   const table = document.getElementById("board")
+
+  //graphics logic for dictating turn, winner, tie
   for(let i = 0; i < 3; i++) {
     // 3 rows
     const tr = document.createElement("tr")
     for(let j = 0; j < 3; j++) {
       // 3 columns
       const td = document.createElement("td")
+      //initialize board values
       td.textContent = gameBoard.getBoard()[i][j]
       td.addEventListener("click", () => {
-        if(!displayController.isGameOver()) { //game is not over (no winners)
-          const move = displayController.playerMove(i, j)
-          if(move) { //player made a valid move
-            //update the td's textContent to reflect gameBoard
-            table.childNodes.forEach((row, r)=>row.childNodes.forEach((cell, c) => cell.textContent = gameBoard.getBoard()[r][c]))
-            // td.textContent = gameBoard.getBoard()[i][j]
-            if(displayController.getWinner()) {
-              if(displayController.getWinner() == p1) {
-                document.getElementById("p1").setAttribute("winner", "true")
-              } else {
-                document.getElementById("p2").setAttribute("winner", "true")
-              }
-            } else if(displayController.getWinner() == null && displayController.isGameOver()) {
-              document.getElementById("p1").setAttribute("winner", "neither")
-              document.getElementById("p2").setAttribute("winner", "neither")
+        const next = displayController.playerMove(i, j)
+        if(next != null) { //player made a valid move
+          //update the td's textContent to reflect gameBoard
+          table.childNodes.forEach((row, r)=>row.childNodes.forEach((cell, c) => cell.textContent = gameBoard.getBoard()[r][c]))
+          if(displayController.getWinner()) {
+            if(displayController.getWinner() == p1) {
+              document.getElementById("p1").setAttribute("winner", "true")
             } else {
-              if(move == p1 && !p2.isAI()) {
-                //swap the values of "data-my-turn"
-                document.getElementById("p1").setAttribute("data-my-turn", "false")
-                document.getElementById("p2").setAttribute("data-my-turn", "true")
-              } else if(move == p2 && !p1.isAI()) { //move = p2
-                document.getElementById("p1").setAttribute("data-my-turn", "true")
-                document.getElementById("p2").setAttribute("data-my-turn", "false")
-              }
+              document.getElementById("p2").setAttribute("winner", "true")
+            }
+          } else if(displayController.getWinner() == null && displayController.isGameOver()) {
+            document.getElementById("p1").setAttribute("winner", "neither")
+            document.getElementById("p2").setAttribute("winner", "neither")
+          } else {
+            if(next == p1 && !p2.isAI()) {
+              //swap the values of "data-my-turn"
+              document.getElementById("p1").setAttribute("data-my-turn", "false")
+              document.getElementById("p2").setAttribute("data-my-turn", "true")
+            } else if(next == p2 && !p1.isAI()) { //move = p2
+              document.getElementById("p1").setAttribute("data-my-turn", "true")
+              document.getElementById("p2").setAttribute("data-my-turn", "false")
             }
           }
-        } else {
         }
+        
       })
       tr.appendChild(td)
     }
     table.appendChild(tr)
   }
 
-  //change name handling stuffs
+  //handling when "Edit Name" buttons are pressed
   const p1Edit = document.getElementById("p1nameEdit")
   p1Edit.addEventListener("click", () => {
     //hide edit button
@@ -318,6 +308,7 @@ const displayController = (() => {
     })
   })
 
+  //handling when restart button is pressed
   document.getElementById("restart").addEventListener("click", () => {
     displayController.restart()
     table.childNodes.forEach(row => row.childNodes.forEach(cell => cell.textContent = ' '))
