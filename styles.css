@@ -1,3 +1,9 @@
+body {
+  position:relative;
+  font-size: 50px;
+  font-family: monospace;
+}
+
 table, td {
   font-size: 50px;
   font-family: monospace;
@@ -7,6 +13,9 @@ table, td {
 }
 
 table {
+  position: absolute;
+  left:50%;
+  margin-left: -100px;
   table-layout: fixed;
   width: 200px;
   height: 200px;
@@ -15,4 +24,39 @@ table {
 td {
   width: 33%;
   height: 33%;
+}
+
+div, button{
+  font-size: 25px;
+  font-family:monospace;
+  text-align: center;
+}
+
+.container {
+  width: 25%;
+  padding: 25px 15px;
+}
+
+form {
+  display: none;
+}
+
+#p1 {
+  position:absolute;
+  top: 50%;
+  left:0;
+}
+
+#p2 {
+  position: absolute;
+  top:50%;
+  right: 0;
+}
+
+[data-my-turn="true"] {
+  background-color: rgb(172, 172, 255);
+}
+
+[winner="true"] {
+  background-color: rgb(172, 255, 172);
 }
