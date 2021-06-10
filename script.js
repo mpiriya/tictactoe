@@ -170,7 +170,7 @@ const displayController = (() => {
     document.getElementById("p1nameForm").style.display = "block"
     document.getElementById("p1nameSubmit").addEventListener("click", () => {
       p1.setName(document.getElementById("p1nameText").value)
-      document.getElementById("p1name").textContent = p1.getName()
+      document.getElementById("p1name").textContent = p1.getName() + ": " + p1.getToken()
       document.getElementById("p1nameForm").style.display = "none"
       p1Edit.style.display = "inline-block"
     })
@@ -184,7 +184,7 @@ const displayController = (() => {
     document.getElementById("p2nameForm").style.display = "block"
     document.getElementById("p2nameSubmit").addEventListener("click", () => {
       p2.setName(document.getElementById("p2nameText").value)
-      document.getElementById("p2name").textContent = p2.getName()
+      document.getElementById("p2name").textContent = p2.getName() + ": " + p2.getToken()
       document.getElementById("p2nameForm").style.display = "none"
       p2Edit.style.display = "inline-block"
     })
