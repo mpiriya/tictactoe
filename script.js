@@ -1,41 +1,40 @@
 //Player Factory
-const Player = (name, token) => {
+const Player = (name, token, AI) => {
   const getName = () => name;
   const setName = (newname) => name = newname;
   const getToken = () => token;
+  const isAI = () => AI;
 
-  return {getName, setName, getToken}
+  return {getName, setName, getToken, isAI}
 };
 
-const p1 = Player("Player 1", "X");
-const p2 = Player("Player 2", "O");
+const p1 = Player("Player 1", "X", false);
+const p2 = Player("Player 2", "O", true);
 
 //game board module
 const gameBoard = (() => {
-  let board = [[' ', ' ', ' '], 
-               [' ', ' ', ' '],
-               [' ', ' ', ' ']];
-  let moveCount = 0;
+  let board = [[' ', 'O', 'X'], 
+               ['O', 'X', 'X'],
+               ['O', ' ', ' ']];
   
   const getBoard = () => board;
-  const getMoveCount = () => moveCount;
   const placeToken = (row, col, token) => {
     if(board[row][col] != ' ') {
       return false
     }
     board[row][col] = token;
-    moveCount++;
     return true
   }
+  const printBoard = () => console.log(board[0].join(" ") + "\n" + board[1].join(" ") + "\n" + board[2].join(" "));
+
   const restart = () => {
     board = [[' ', ' ', ' '], 
                [' ', ' ', ' '],
                [' ', ' ', ' ']];
-    moveCount = 0;
   }
   
   // only give getBoard so that end user can't manually edit board and cheat
-  return {getBoard, getMoveCount, placeToken, restart}
+  return {getBoard, placeToken, printBoard, restart}
 })();
 
 //display controller module
@@ -49,61 +48,186 @@ const displayController = (() => {
   const isGameOver = () => gameOver;
   const getWinner = () => winner;
 
+  const processTurn = (row, col) => {
+    if(!currentPlayer.isAI()) {
+      playerMove(row, col)
+    } else {
+      AIMove(currentPlayer, nextPlayer)
+    }
+  }
+
   const playerMove = (row, col) => {
     if(!board.placeToken(row, col, currentPlayer.getToken())) {
       //do not switch player, and just do nothing
       return null
     }
 
+    if(checkWin(currentPlayer)) {
+      gameOver = true
+      return winner
+    }
+
+    //check tie
+    if(checkTie()) {
+      gameOver = true
+    }
+
+    //if not gameOver and current is AI, then do AIMove, return currentPlayer
+    if(!gameOver && nextPlayer.isAI()) {
+      AIMove(currentPlayer, nextPlayer)
+      if(checkWin(nextPlayer)) {
+        gameOver = true
+      }
+      return currentPlayer
+    }
+
+    //otherwise, swap the two players so that the next player's token is placed next turn
+    let temp = currentPlayer;
+    currentPlayer = nextPlayer;
+    nextPlayer = temp;
+
+
+    return nextPlayer //returns player who made last move
+  }
+
+  const checkWin = (player) => {
     for(let i = 0; i < 3; i++) { //check rows
-      if(board.getBoard()[i].every(element => element == currentPlayer.getToken())) {
+      if(board.getBoard()[i].every(element => element == player.getToken())) {
         gameOver = true;
-        winner = currentPlayer;
+        winner = player;
         return winner
       }
     }
 
     for(let i = 0; i < 3; i++) { //check columns
       let subarray = [board.getBoard()[0][i], board.getBoard()[1][i], board.getBoard()[2][i]];
-      if(subarray.every(element => element == currentPlayer.getToken())) {
+      if(subarray.every(element => element == player.getToken())) {
         gameOver = true;
-        winner = currentPlayer;
+        winner = player;
         return winner
       }
     }
 
     //check diags
     let subarray = [board.getBoard()[0][0], board.getBoard()[1][1], board.getBoard()[2][2]];
-    if(subarray.every(element => element == currentPlayer.getToken())) {
+    if(subarray.every(element => element == player.getToken())) {
       gameOver = true;
-      winner = currentPlayer;
+      winner = player;
       return winner
     }
     subarray = [board.getBoard()[0][2], board.getBoard()[1][1], board.getBoard()[2][0]];
-    if(subarray.every(element => element == currentPlayer.getToken())) {
+    if(subarray.every(element => element == player.getToken())) {
       gameOver = true;
-      winner = currentPlayer;
+      winner = player;
       return winner
     }
 
-    //check tie
-    if(board.getMoveCount() == 9 && winner == null) {
-      gameOver = true;
-      //Alert user of tie
-      
-      //Prompt user for new game
+    return null
+  }
 
-        //if yes: reset all elements
+  const checkTie = () => {
+    for(let i = 0; i < board.getBoard().length; i++) {
+      for(let j = 0; j < board.getBoard()[i].length; j++) {
+        if(board.getBoard()[i][j] == " ")
+          return false
+      }
+    }
+    return checkWin(currentPlayer) == null && checkWin(nextPlayer) == null
+  }
 
-        //if no: hide prompt
+  const AIMove = (human, ai) => {
+    //do the minimax thing
+    let maxScore = -1;
+    let bestMove = {row: -1, col: -1}
+    for(let i = 0; i < 3; i++) {
+      for(let j = 0; j < 3; j++) {
+        // if(boardCopy[i][j] == " ") {
+        //   boardCopy[i][j] = currentPlayer.getToken()
+        //   let score = minimax(boardCopy, nextPlayer)
+        //   boardCopy[i][j] = " " //return boardCopy[i][j] to preserve board state
+        //   if(score > maxScore) {
+        //     maxScore = score
+        //     bestMove = {row: i, col: j}
+        //   }
+        // }
+        if(board.placeToken(i, j, ai.getToken())) {
+          let score = minimax(human, ai, human)
+          board.getBoard()[i][j] = " "
+          if(score > maxScore) {
+            maxScore = score
+            bestMove = {row: i, col: j}
+          }
+        }
+      }
+    }
+    //place token
+    board.placeToken(bestMove.row, bestMove.col, ai.getToken())
+    //otherwise, function is done :)
+  }
+
+  const minimax = (human, ai, next) => {
+    if(checkWin(ai)) { //if in simulated move scenario, winner is AI
+      gameOver = false
+      winner = null
+      return 1
+    } else if(checkWin(human)) { //if in simulated move scenario, winner is Person
+      gameOver = false
+      winner = null
+      return -1
+    } else if(checkTie()) {
+      gameOver = false
+      winner = null
+      return 0
     }
 
-    //swap the two players so that the next player's token is placed next turn
-    let temp = currentPlayer;
-    currentPlayer = nextPlayer;
-    nextPlayer = temp;
+    if(next == ai) {
+      //otherwise, explore next level of depth for currentPlayer
+      let maxScore = -1;
+      for(let i = 0; i < 3; i++) {
+        for(let j = 0; j < 3; j++) {
+          // if(boardCopy[i][j] == " ") {
+          //   boardCopy[i][j] = currentPlayer.getToken()
+          //   let score = minimax(boardCopy, nextPlayer)
+          //   boardCopy[i][j] = " " //return boardCopy[i][j] to preserve board state
+          //   if(score > maxScore) {
+          //     maxScore = score
+          //   }
+          // }
+          if(board.placeToken(i, j, next.getToken())) {
+            let score = minimax(human, ai, human)
+            board.getBoard()[i][j] = " "
+            if(score > maxScore) {
+              maxScore = score
+            }
+          }
+        }
+      }
+      return maxScore
+    } else { //assuming nextPlayer (human) plays optimally
+      let minScore = 1;
+      for(let i = 0; i < 3; i++) {
+        for(let j = 0; j < 3; j++) {
+          // if(boardCopy[i][j] == " ") {
+          //   boardCopy[i][j] = nextPlayer.getToken()
+          //   let score = minimax(boardCopy, currentPlayer)
+          //   boardCopy[i][j] = " " //return boardCopy[i][j] to preserve board state
+          //   if(score < minScore) {
+          //     minScore = score
+          //   }
+          // }
 
-    return nextPlayer //returns player who made last move
+          if(board.placeToken(i, j, next.getToken())) {
+            let score = minimax(human, ai, ai)
+            board.getBoard()[i][j] = " "
+            if(score < minScore) {
+              minScore = score
+            }
+          }
+        }
+      }
+
+      return minScore
+    }
   }
 
   const restart = () => {
@@ -135,19 +259,23 @@ const displayController = (() => {
           const move = displayController.playerMove(i, j)
           if(move) { //player made a valid move
             //update the td's textContent to reflect gameBoard
-            td.textContent = gameBoard.getBoard()[i][j]
+            table.childNodes.forEach((row, r)=>row.childNodes.forEach((cell, c) => cell.textContent = gameBoard.getBoard()[r][c]))
+            // td.textContent = gameBoard.getBoard()[i][j]
             if(displayController.getWinner()) {
-              if(move == p1) {
+              if(displayController.getWinner() == p1) {
                 document.getElementById("p1").setAttribute("winner", "true")
               } else {
                 document.getElementById("p2").setAttribute("winner", "true")
               }
-            }else {
-              if(move == p1) {
+            } else if(displayController.getWinner() == null && displayController.isGameOver()) {
+              document.getElementById("p1").setAttribute("winner", "neither")
+              document.getElementById("p2").setAttribute("winner", "neither")
+            } else {
+              if(move == p1 && !p2.isAI()) {
                 //swap the values of "data-my-turn"
                 document.getElementById("p1").setAttribute("data-my-turn", "false")
                 document.getElementById("p2").setAttribute("data-my-turn", "true")
-              } else { //move = p2
+              } else if(move == p2 && !p1.isAI()) { //move = p2
                 document.getElementById("p1").setAttribute("data-my-turn", "true")
                 document.getElementById("p2").setAttribute("data-my-turn", "false")
               }

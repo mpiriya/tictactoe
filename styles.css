@@ -75,6 +75,11 @@ form {
   border: 4px solid rgb(172, 172, 255);
 }
 
+[winner="neither"] {
+  border: 4px solid white;
+  background-color: rgb(172, 172, 172);
+}
+
 [winner="true"] {
   border: 4px solid white;
   background-color: rgb(172, 255, 172);
