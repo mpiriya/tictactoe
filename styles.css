@@ -55,14 +55,14 @@ form {
 
 #p1 {
   position:absolute;
-  margin-left: 500px;
+  margin-left: 25%;
   top: 100px;
   left:0;
 }
 
 #p2 {
   position: absolute;
-  margin-right: 500px;
+  margin-right: 25%;
   top: 100px;
   right: 0;
 }
