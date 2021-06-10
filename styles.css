@@ -14,6 +14,7 @@ table, td {
 
 table {
   position: absolute;
+  top: 100px;
   left:50%;
   margin-left: -100px;
   table-layout: fixed;
@@ -26,14 +27,14 @@ td {
   height: 33%;
 }
 
-div, button{
+div, button, input{
   font-size: 25px;
   font-family:monospace;
   text-align: center;
 }
 
 .container {
-  width: 25%;
+  width: 15%;
   padding: 25px 15px;
 }
 
@@ -41,22 +42,36 @@ form {
   display: none;
 }
 
+#restart {
+  position: absolute;
+  left: 50%;
+  top: 350px;
+  margin-left: -60px;
+}
+
+.name, .token, .edit, form {
+  padding: 5px;
+}
+
 #p1 {
   position:absolute;
-  top: 50%;
+  margin-left: 500px;
+  top: 100px;
   left:0;
 }
 
 #p2 {
   position: absolute;
-  top:50%;
+  margin-right: 500px;
+  top: 100px;
   right: 0;
 }
 
 [data-my-turn="true"] {
-  background-color: rgb(172, 172, 255);
+  border: 4px solid rgb(172, 172, 255);
 }
 
 [winner="true"] {
+  border: 4px solid white;
   background-color: rgb(172, 255, 172);
 }

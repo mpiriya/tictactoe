@@ -27,9 +27,15 @@ const gameBoard = (() => {
     moveCount++;
     return true
   }
+  const restart = () => {
+    board = [[' ', ' ', ' '], 
+               [' ', ' ', ' '],
+               [' ', ' ', ' ']];
+    moveCount = 0;
+  }
   
   // only give getBoard so that end user can't manually edit board and cheat
-  return {getBoard, getMoveCount, placeToken}
+  return {getBoard, getMoveCount, placeToken, restart}
 })();
 
 //display controller module
@@ -46,14 +52,14 @@ const displayController = (() => {
   const playerMove = (row, col) => {
     if(!board.placeToken(row, col, currentPlayer.getToken())) {
       //do not switch player, and just do nothing
-      return false
+      return null
     }
 
     for(let i = 0; i < 3; i++) { //check rows
       if(board.getBoard()[i].every(element => element == currentPlayer.getToken())) {
         gameOver = true;
         winner = currentPlayer;
-        return true
+        return winner
       }
     }
 
@@ -62,7 +68,7 @@ const displayController = (() => {
       if(subarray.every(element => element == currentPlayer.getToken())) {
         gameOver = true;
         winner = currentPlayer;
-        return true
+        return winner
       }
     }
 
@@ -71,13 +77,13 @@ const displayController = (() => {
     if(subarray.every(element => element == currentPlayer.getToken())) {
       gameOver = true;
       winner = currentPlayer;
-      return true
+      return winner
     }
     subarray = [board.getBoard()[0][2], board.getBoard()[1][1], board.getBoard()[2][0]];
     if(subarray.every(element => element == currentPlayer.getToken())) {
       gameOver = true;
       winner = currentPlayer;
-      return true
+      return winner
     }
 
     //check tie
@@ -97,14 +103,22 @@ const displayController = (() => {
     currentPlayer = nextPlayer;
     nextPlayer = temp;
 
-    return true
+    return nextPlayer //returns player who made last move
+  }
+
+  const restart = () => {
+    board.restart()
+    currentPlayer = p1;
+    nextPlayer = p2;
+    winner = null
+    gameOver = false;
   }
 
   /* only make available what's really necessary: 
       allowing the next player to make a move at a certain space and
       letting the user know whether the game is over or not
   */
-  return {isGameOver, getWinner, playerMove}
+  return {isGameOver, getWinner, playerMove, restart}
 })();
 
 (function createHTMLBoard() {
@@ -118,10 +132,28 @@ const displayController = (() => {
       td.textContent = gameBoard.getBoard()[i][j]
       td.addEventListener("click", () => {
         if(!displayController.isGameOver()) { //game is not over (no winners)
-          if(displayController.playerMove(i, j)) { //player made a valid move
+          const move = displayController.playerMove(i, j)
+          if(move) { //player made a valid move
             //update the td's textContent to reflect gameBoard
             td.textContent = gameBoard.getBoard()[i][j]
+            if(displayController.getWinner()) {
+              if(move == p1) {
+                document.getElementById("p1").setAttribute("winner", "true")
+              } else {
+                document.getElementById("p2").setAttribute("winner", "true")
+              }
+            }else {
+              if(move == p1) {
+                //swap the values of "data-my-turn"
+                document.getElementById("p1").setAttribute("data-my-turn", "false")
+                document.getElementById("p2").setAttribute("data-my-turn", "true")
+              } else { //move = p2
+                document.getElementById("p1").setAttribute("data-my-turn", "true")
+                document.getElementById("p2").setAttribute("data-my-turn", "false")
+              }
+            }
           }
+        } else {
         }
       })
       tr.appendChild(td)
@@ -129,7 +161,7 @@ const displayController = (() => {
     table.appendChild(tr)
   }
 
-  //button handling stuffs
+  //change name handling stuffs
   const p1Edit = document.getElementById("p1nameEdit")
   p1Edit.addEventListener("click", () => {
     //hide edit button
@@ -156,5 +188,16 @@ const displayController = (() => {
       document.getElementById("p2nameForm").style.display = "none"
       p2Edit.style.display = "inline-block"
     })
+  })
+
+  document.getElementById("restart").addEventListener("click", () => {
+    displayController.restart()
+    table.childNodes.forEach(row => row.childNodes.forEach(cell => cell.textContent = ' '))
+
+    document.getElementById("p1").setAttribute("data-my-turn", "true")
+    document.getElementById("p2").setAttribute("data-my-turn", "false")
+
+    document.getElementById("p1").setAttribute("winner", "false")
+    document.getElementById("p2").setAttribute("winner", "false")
   })
 })();
