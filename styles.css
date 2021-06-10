@@ -38,6 +38,10 @@ div, button, input{
   padding: 25px 15px;
 }
 
+[id="p1nameText"], [id="p2nameText"] {
+  width: 130px;
+}
+
 form {
   display: none;
 }
