@@ -4,6 +4,11 @@ body {
   font-family: monospace;
 }
 
+h1 {
+  margin: 0px;
+  text-align: center;
+}
+
 table, td {
   font-size: 50px;
   font-family: monospace;
@@ -14,7 +19,7 @@ table, td {
 
 table {
   position: absolute;
-  top: 100px;
+  top: 125px;
   left:50%;
   margin-left: -100px;
   table-layout: fixed;
@@ -52,8 +57,12 @@ input[type="text"] {
   margin: 15px 0px 0px 0px;
 }
 
-.g, input:hover, button:hover {
+.g:hover, input:hover, button:hover {
   cursor: pointer;
+}
+
+.g:hover {
+  background-color: #eee;
 }
 
 input[type="button"]:hover, button:hover {
@@ -115,14 +124,14 @@ input[type="checkbox"]:checked {
 #p1 {
   position:absolute;
   margin-left: 25%;
-  top: 100px;
+  top: 175px;
   left:0;
 }
 
 #p2 {
   position: absolute;
   margin-right: 25%;
-  top: 100px;
+  top: 175px;
   right: 0;
 }
 
