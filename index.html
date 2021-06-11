@@ -6,26 +6,29 @@
 
 <body>
   <div class="landing-page">
-    
+    <form id="gameForm">
+      <div>Settings</div>
+      <input type="text" placeholder="Player 1" id="p1initName" required>
+      <input type="checkbox" id="p1iscpu"> CPU?
+      <br>
+      <input type="text" placeholder="Player 2" id="p2initName" required>
+      <input type="checkbox" id="p2iscpu"> CPU?
+      <br>
+      <input type="button" id="startGame" value="Start Game">
+    </form>
   </div>
   
   <div class="container">
-    <button id="restart">Restart</button>
+    <div id="controls">
+      <button id="restart">Restart</button>
+      <button id="settings">Settings</button>
+    </div>
+    
     <div class="game" id="p1" data-my-turn="true">
       <div class="name" id="p1name">Player 1: X</div>
-      <button class="edit" id="p1nameEdit">Edit Name</button>
-      <form id="p1nameForm">
-        <input type="text" id="p1nameText">
-        <input type="button" id="p1nameSubmit" value="OK">
-      </form>
     </div>
     <div class="game" id="p2" data-my-turn="false">
       <div class="name" id="p2name">Player 2: O</div>
-      <button class="edit" id="p2nameEdit">Edit Name</button>
-      <form id="p2nameForm">
-        <input type="text" id="p2nameText">
-        <input type="button" id="p2nameSubmit" value="OK">
-      </form>
     </div>
     <div class="game">
       <table id="board"></table>

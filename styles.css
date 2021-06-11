@@ -29,8 +29,16 @@ td {
 
 div, button, input{
   font-size: 25px;
-  font-family:monospace;
+  font-family: monospace;
   text-align: center;
+}
+
+.landing-page {
+  font-size: 25px;
+  height: 200px;
+  width: 500px;
+  display: block;
+  border: 1px solid black;
 }
 
 .game {
@@ -38,19 +46,19 @@ div, button, input{
   padding: 25px 15px;
 }
 
-[id="p1nameText"], [id="p2nameText"] {
+#p1nameText, #p2nameText {
   width: 130px;
 }
 
-form {
+#p1nameForm, #p2nameForm {
   display: none;
 }
 
-#restart {
+#controls {
   position: absolute;
   left: 50%;
   top: 350px;
-  margin-left: -60px;
+  margin-left: -135px;
 }
 
 .name, .token, .edit, form {

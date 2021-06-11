@@ -24,7 +24,7 @@ const gameBoard = (() => {
 
   const isGameOver = () => gameOver;
   const getWinner = () => winner;
-  const getBoard = () => board;
+  const getBoard = (i, j) => board[i][j];
 
   const initGame = () => {
     board = [[' ', ' ', ' '], 
@@ -34,9 +34,21 @@ const gameBoard = (() => {
     nextPlayer = p2
     winner = null
     gameOver = false
-    if(currentPlayer.isAI()) {
-      AIMove()
+    if(currentPlayer.isAI() && nextPlayer.isAI()) {
+      while(!gameOver) {
+        AIMove(nextPlayer, currentPlayer)
+        swapPlayers()
+      }
+    } else if(currentPlayer.isAI() && !nextPlayer.isAI()) {
+      AIMove(nextPlayer, currentPlayer)
+      swapPlayers()
     }
+  }
+
+  const swapPlayers = () => {
+    let temp = currentPlayer
+    currentPlayer = nextPlayer
+    nextPlayer = temp
   }
 
   const placeToken = (row, col, token) => {
@@ -78,9 +90,7 @@ const gameBoard = (() => {
     }
 
     //otherwise, swap the two players so that the next player chooses the next square
-    let temp = currentPlayer;
-    currentPlayer = nextPlayer;
-    nextPlayer = temp;
+    swapPlayers()
 
 
     return nextPlayer //returns player who made last move
@@ -138,17 +148,35 @@ const gameBoard = (() => {
     for(let i = 0; i < 3; i++) {
       for(let j = 0; j < 3; j++) {
         if(placeToken(i, j, ai.getToken())) {
+          // console.log("testing placing " + ai.getToken() + " at board " + i + ", " + j)
           let score = minimax(human, ai, human)
-          getBoard()[i][j] = " "
+          // console.log("placing at board " + i + ", " + j + " gives score of " + score)
+          board[i][j] = " "
           if(score > maxScore) {
+            // console.log("pOOOOOOOOOOOOOOOOOOÔP")
             maxScore = score
+            // console.log("setting best move to " + i + ", " + j)
             bestMove = {row: i, col: j}
           }
         }
       }
     }
-    //place token
+
+    // console.log(bestMove)
     placeToken(bestMove.row, bestMove.col, ai.getToken())
+    // printBoard()
+
+    if(checkWin(currentPlayer)) {
+      //if so, set gameOver to true and 
+      gameOver = true
+      return winner
+    }
+
+    //check tie
+    if(checkTie()) {
+      gameOver = true
+    }
+    
     //otherwise, function is done :)
   }
 
@@ -174,52 +202,93 @@ const gameBoard = (() => {
         for(let j = 0; j < 3; j++) {
           if(placeToken(i, j, next.getToken())) {
             let score = minimax(human, ai, human)
-            getBoard()[i][j] = " "
+            board[i][j] = " "
             if(score > maxScore) {
               maxScore = score
             }
           }
         }
       }
+      // printBoard()
       return maxScore
-    } else { //assuming nextPlayer (human) plays optimally
+    } else { //assuming nextPlayer (human or ai now) plays optimally
       let minScore = 1;
       for(let i = 0; i < 3; i++) {
         for(let j = 0; j < 3; j++) {
           if(placeToken(i, j, next.getToken())) {
             let score = minimax(human, ai, ai)
-            getBoard()[i][j] = " "
+            board[i][j] = " "
             if(score < minScore) {
               minScore = score
             }
           }
         }
       }
-
+      // printBoard()
       return minScore
     }
   }
 
-  const printBoard = () => console.log(board[0].join(" ") + "\n" + board[1].join(" ") + "\n" + board[2].join(" "));
-
-  const restart = () => {
-    board = [[' ', ' ', ' '], 
-             [' ', ' ', ' '],
-             [' ', ' ', ' ']];
-    currentPlayer = p1;
-    nextPlayer = p2;
-    winner = null
-    gameOver = false;
+  const printBoard = () => {
+    console.log(board[0].join(" ") + "\n" + board[1].join(" ") + "\n" + board[2].join(" "))
   }
   
   // only give getBoard so that end user can't manually edit board and cheat
-  return {getBoard, isGameOver, getWinner, playerMove, printBoard, restart}
+  return {getBoard, initGame, isGameOver, getWinner, playerMove, printBoard}
 })();
 
 //display controller module
 const displayController = (() => {
   const board = gameBoard;
   const table = document.getElementById("board")
+
+  const initLandingPage = () => {
+    initBoard()
+    initControls()
+    document.getElementById("startGame").addEventListener("click", () => {
+      if(document.getElementById("p1initName").value != "") {
+        p1.setName(document.getElementById("p1initName").value)
+      }
+      p1.setisAI(document.getElementById("p1iscpu").checked)
+      
+      document.getElementById("p1name").textContent = p1.getName() + ": " + p1.getToken()
+
+      if(document.getElementById("p2initName").value != "") {
+        p2.setName(document.getElementById("p2initName").value)
+      }
+      p2.setisAI(document.getElementById("p2iscpu").checked)
+
+      document.getElementById("p2name").textContent = p2.getName() + ": " + p2.getToken()
+
+      document.getElementById("gameForm").style.display = "none"
+
+      board.initGame()
+      updateDisplay()
+    })
+  }
+
+  const updateDisplay = (next) => {
+    table.childNodes.forEach((row, r)=>row.childNodes.forEach((cell, c) => cell.textContent = gameBoard.getBoard(r,c)))
+    if(board.getWinner()) {
+      if(board.getWinner() == p1) {
+        document.getElementById("p1").setAttribute("winner", "true")
+      } else {
+        document.getElementById("p2").setAttribute("winner", "true")
+      }
+    } else if(board.getWinner() == null && board.isGameOver()) {
+      document.getElementById("p1").setAttribute("winner", "neither")
+      document.getElementById("p2").setAttribute("winner", "neither")
+    } else {
+      if(next == p1 && !p2.isAI()) {
+        //swap the values of "data-my-turn"
+        document.getElementById("p1").setAttribute("data-my-turn", "false")
+        document.getElementById("p2").setAttribute("data-my-turn", "true")
+      } else if(next == p2 && !p1.isAI()) { //move = p2
+        document.getElementById("p1").setAttribute("data-my-turn", "true")
+        document.getElementById("p2").setAttribute("data-my-turn", "false")
+      }
+    }
+  }
 
   const initBoard = () => {
     //graphics logic for dictating turn, winner, tie
@@ -230,31 +299,11 @@ const displayController = (() => {
         // 3 columns
         const td = document.createElement("td")
         //initialize board values
-        td.textContent = board.getBoard()[i][j]
         td.addEventListener("click", () => {
           const next = board.playerMove(i, j)
           if(next != null) { //player made a valid move
             //update the td's textContent to reflect gameBoard
-            table.childNodes.forEach((row, r)=>row.childNodes.forEach((cell, c) => cell.textContent = gameBoard.getBoard()[r][c]))
-            if(board.getWinner()) {
-              if(board.getWinner() == p1) {
-                document.getElementById("p1").setAttribute("winner", "true")
-              } else {
-                document.getElementById("p2").setAttribute("winner", "true")
-              }
-            } else if(board.getWinner() == null && board.isGameOver()) {
-              document.getElementById("p1").setAttribute("winner", "neither")
-              document.getElementById("p2").setAttribute("winner", "neither")
-            } else {
-              if(next == p1 && !p2.isAI()) {
-                //swap the values of "data-my-turn"
-                document.getElementById("p1").setAttribute("data-my-turn", "false")
-                document.getElementById("p2").setAttribute("data-my-turn", "true")
-              } else if(next == p2 && !p1.isAI()) { //move = p2
-                document.getElementById("p1").setAttribute("data-my-turn", "true")
-                document.getElementById("p2").setAttribute("data-my-turn", "false")
-              }
-            }
+            updateDisplay(next)
           }
           
         })
@@ -264,40 +313,8 @@ const displayController = (() => {
     }
   }
 
-  const initNameButtons = () => {
-    //handling when "Edit Name" buttons are pressed
-    const p1Edit = document.getElementById("p1nameEdit")
-    p1Edit.addEventListener("click", () => {
-      //hide edit button
-      p1Edit.style.display = "none"
-      //show input field, input submit button
-      document.getElementById("p1nameForm").style.display = "block"
-      document.getElementById("p1nameSubmit").addEventListener("click", () => {
-        p1.setName(document.getElementById("p1nameText").value)
-        document.getElementById("p1name").textContent = p1.getName() + ": " + p1.getToken()
-        document.getElementById("p1nameForm").style.display = "none"
-        p1Edit.style.display = "inline-block"
-      })
-    })
-
-    const p2Edit = document.getElementById("p2nameEdit")
-    p2Edit.addEventListener("click", () => {
-      //hide edit button
-      p2Edit.style.display = "none"
-      //show input field, input submit button
-      document.getElementById("p2nameForm").style.display = "block"
-      document.getElementById("p2nameSubmit").addEventListener("click", () => {
-        p2.setName(document.getElementById("p2nameText").value)
-        document.getElementById("p2name").textContent = p2.getName() + ": " + p2.getToken()
-        document.getElementById("p2nameForm").style.display = "none"
-        p2Edit.style.display = "inline-block"
-      })
-    })
-  }
-
-  const initRestartButton = () => {
+  const initControls = () => {
     document.getElementById("restart").addEventListener("click", () => {
-      displayController.restart()
       table.childNodes.forEach(row => row.childNodes.forEach(cell => cell.textContent = ' '))
   
       document.getElementById("p1").setAttribute("data-my-turn", "true")
@@ -305,6 +322,12 @@ const displayController = (() => {
   
       document.getElementById("p1").setAttribute("winner", "false")
       document.getElementById("p2").setAttribute("winner", "false")
+      board.initGame()
+      updateDisplay()
+    })
+
+    document.getElementById("settings").addEventListener("click", () => {
+      document.getElementById("gameForm").style.display = "block"
     })
   }
 
@@ -312,6 +335,7 @@ const displayController = (() => {
       allowing the next player to make a move at a certain space and
       letting the user know whether the game is over or not
   */
-  return {isGameOver, getWinner, playerMove, restart}
+  return {initLandingPage}
 })();
 
+displayController.initLandingPage()
