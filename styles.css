@@ -27,18 +27,77 @@ td {
   height: 33%;
 }
 
+h3 {
+  margin:0px;
+}
+
 div, button, input{
   font-size: 25px;
   font-family: monospace;
+}
+
+div, button, input[type="button"]{
+  
   text-align: center;
+}
+
+input[type="button"], button{
+  padding: 5px;
+  margin: 15px 0px;
+  border-radius: 5px;
+  background:rgb(200, 200, 255)
+}
+
+input[type="text"] {
+  margin: 15px 0px 0px 0px;
+}
+
+.g, input:hover, button:hover {
+  cursor: pointer;
+}
+
+input[type="button"]:hover, button:hover {
+  background: rgb(150, 230, 163);
+}
+
+.landingBG {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(0, 0, 0, 0.6);
 }
 
 .landing-page {
   font-size: 25px;
   height: 200px;
   width: 500px;
-  display: block;
+  padding: 15px 5px;
+  background-color: rgb(255, 255, 255);
+  position: relative;
+  top: 30%;
+  left: 50%;
+  margin-top: -100px;
+  margin-left: -250px;
+}
+
+input[type="checkbox"] {
+  -webkit-appearance: none;
+  cursor:pointer;
+  position:relative;
+  top:5px;
+  height: 25px;
+  width: 25px;
+  background: white;
+  border-radius: 5px;
   border: 1px solid black;
+}
+
+input[type="checkbox"]:checked {
+  background: rgb(0, 255, 0);
 }
 
 .game {
@@ -46,23 +105,11 @@ div, button, input{
   padding: 25px 15px;
 }
 
-#p1nameText, #p2nameText {
-  width: 130px;
-}
-
-#p1nameForm, #p2nameForm {
-  display: none;
-}
-
 #controls {
   position: absolute;
   left: 50%;
   top: 350px;
   margin-left: -135px;
-}
-
-.name, .token, .edit, form {
-  padding: 5px;
 }
 
 #p1 {
@@ -91,4 +138,8 @@ div, button, input{
 [winner="true"] {
   border: 4px solid white;
   background-color: rgb(172, 255, 172);
+}
+
+.open {
+  display: block;
 }

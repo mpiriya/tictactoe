@@ -241,6 +241,7 @@ const gameBoard = (() => {
 const displayController = (() => {
   const board = gameBoard;
   const table = document.getElementById("board")
+  const bg = document.querySelector(".landingBG")
 
   const initLandingPage = () => {
     initBoard()
@@ -260,7 +261,7 @@ const displayController = (() => {
 
       document.getElementById("p2name").textContent = p2.getName() + ": " + p2.getToken()
 
-      document.getElementById("gameForm").style.display = "none"
+      bg.classList.remove("open")
 
       board.initGame()
       updateDisplay()
@@ -268,6 +269,12 @@ const displayController = (() => {
   }
 
   const updateDisplay = (next) => {
+    document.getElementById("p1").setAttribute("data-my-turn", "true")
+    document.getElementById("p2").setAttribute("data-my-turn", "false")
+
+    document.getElementById("p1").setAttribute("winner", "false")
+    document.getElementById("p2").setAttribute("winner", "false")
+    
     table.childNodes.forEach((row, r)=>row.childNodes.forEach((cell, c) => cell.textContent = gameBoard.getBoard(r,c)))
     if(board.getWinner()) {
       if(board.getWinner() == p1) {
@@ -298,6 +305,7 @@ const displayController = (() => {
       for(let j = 0; j < 3; j++) {
         // 3 columns
         const td = document.createElement("td")
+        td.classList = "g"
         //initialize board values
         td.addEventListener("click", () => {
           const next = board.playerMove(i, j)
@@ -326,8 +334,20 @@ const displayController = (() => {
       updateDisplay()
     })
 
+    
+
     document.getElementById("settings").addEventListener("click", () => {
-      document.getElementById("gameForm").style.display = "block"
+      if(bg.classList.contains("open")) {
+        bg.classList.remove("open")
+      } else {
+        bg.classList.add("open")
+      }
+    })
+
+    bg.addEventListener("click", event => {
+      if(event.target === bg) {
+        bg.classList.remove("open")
+      }
     })
   }
 
