@@ -249,6 +249,8 @@ const displayController = (() => {
     document.getElementById("startGame").addEventListener("click", () => {
       if(document.getElementById("p1initName").value != "") {
         p1.setName(document.getElementById("p1initName").value)
+      } else {
+        p1.setName("Player 1")
       }
       p1.setisAI(document.getElementById("p1iscpu").checked)
       
@@ -256,6 +258,8 @@ const displayController = (() => {
 
       if(document.getElementById("p2initName").value != "") {
         p2.setName(document.getElementById("p2initName").value)
+      } else {
+        p2.setName("Player 2")
       }
       p2.setisAI(document.getElementById("p2iscpu").checked)
 
