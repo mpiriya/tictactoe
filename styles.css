@@ -135,6 +135,10 @@ input[type="checkbox"]:checked {
   right: 0;
 }
 
+.name {
+  overflow: hidden;
+}
+
 [data-my-turn="true"] {
   border: 4px solid rgb(172, 172, 255);
 }
