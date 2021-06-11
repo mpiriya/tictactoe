@@ -144,26 +144,27 @@ const gameBoard = (() => {
   const AIMove = (human, ai) => {
     //do the minimax thing
     let maxScore = -1;
-    let bestMove = {row: -1, col: -1}
+    let bestMove = []
     for(let i = 0; i < 3; i++) {
       for(let j = 0; j < 3; j++) {
         if(placeToken(i, j, ai.getToken())) {
           // console.log("testing placing " + ai.getToken() + " at board " + i + ", " + j)
           let score = minimax(human, ai, human)
-          // console.log("placing at board " + i + ", " + j + " gives score of " + score)
           board[i][j] = " "
           if(score > maxScore) {
-            // console.log("pOOOOOOOOOOOOOOOOOOÔP")
+            // console.log("pOOOOOOOOOOOOOOOoOOOÔP")
             maxScore = score
             // console.log("setting best move to " + i + ", " + j)
-            bestMove = {row: i, col: j}
+            bestMove = []
+            bestMove.push({row: i, col: j})
+          } else if( score == maxScore) {
+            bestMove.push({row: i, col: j})
           }
         }
       }
     }
-
-    // console.log(bestMove)
-    placeToken(bestMove.row, bestMove.col, ai.getToken())
+    let rand = bestMove[Math.floor(Math.random() * bestMove.length)];
+    placeToken(rand.row, rand.col, ai.getToken())
     // printBoard()
 
     if(checkWin(currentPlayer)) {
